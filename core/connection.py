@@ -102,6 +102,7 @@ class ConnectionHandler:
             await self.auth.authenticate(self.headers)
 
             device_id = self.headers.get("device-id", None)
+            # want modify 此处需增加设备激活及认证（从数据库中),以下bUsePrivateConfig不用管，跳开这段代码
 
             # Load private configuration if device_id is provided
             bUsePrivateConfig = self.config.get("use_private_config", False)
@@ -136,6 +137,7 @@ class ConnectionHandler:
 
             self.welcome_msg = self.config["xiaozhi"]
             self.welcome_msg["session_id"] = self.session_id
+            # want modify 以下Hello后的Response内容结构是为了满足小智设备的回应
             await self.websocket.send(json.dumps(self.welcome_msg))
 
             await self.loop.run_in_executor(None, self._initialize_components)
@@ -171,7 +173,7 @@ class ConnectionHandler:
         self.prompt = self.config["prompt"]
         if self.private_config:
             self.prompt = self.private_config.private_config.get("prompt", self.prompt)
-        # 赋予LLM时间观念
+        # 赋予LLM时间观念 want modify 此处需增加变更提示词中“小智/小志”替换为{robot_name}
         if "{date_time}" in self.prompt:
             date_time = time.strftime("%Y-%m-%d %H:%M", time.localtime())
             self.prompt = self.prompt.replace("{date_time}", date_time)

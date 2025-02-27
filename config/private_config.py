@@ -26,6 +26,7 @@ class PrivateConfig:
         try:
             await self.lock_manager.acquire_lock(self.config_path)
             try:
+                # Want Modify ：改以下从私有配置中获取验证部分为从设备表对应的设备配置文件中获取
                 if os.path.exists(self.config_path):
                     with open(self.config_path, 'r', encoding='utf-8') as f:
                         all_configs = yaml.safe_load(f) or {}
