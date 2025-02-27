@@ -1,15 +1,17 @@
 import asyncio
 import websockets
-import logging
+from config.logger import setup_logging
 from core.connection import ConnectionHandler
 from core.utils.util import get_local_ip
 from core.utils import asr, vad, llm, tts
+
+TAG = __name__
 
 
 class WebSocketServer:
     def __init__(self, config: dict):
         self.config = config
-        self.logger = logging.getLogger(__name__)
+        self.logger = setup_logging()
         self._vad, self._asr, self._llm, self._tts = self._create_processing_instances()
 
     def _create_processing_instances(self):
@@ -20,16 +22,25 @@ class WebSocketServer:
                 self.config["VAD"][self.config["selected_module"]["VAD"]]
             ),
             asr.create_instance(
-                self.config["selected_module"]["ASR"],
+                self.config["selected_module"]["ASR"]
+                if not 'type' in self.config["ASR"][self.config["selected_module"]["ASR"]]
+                else
+                self.config["ASR"][self.config["selected_module"]["ASR"]]["type"],
                 self.config["ASR"][self.config["selected_module"]["ASR"]],
                 self.config["delete_audio"]
             ),
             llm.create_instance(
-                self.config["selected_module"]["LLM"],
+                self.config["selected_module"]["LLM"]
+                if not 'type' in self.config["LLM"][self.config["selected_module"]["LLM"]]
+                else
+                self.config["LLM"][self.config["selected_module"]["LLM"]]['type'],
                 self.config["LLM"][self.config["selected_module"]["LLM"]],
             ),
             tts.create_instance(
-                self.config["selected_module"]["TTS"],
+                self.config["selected_module"]["TTS"]
+                if not 'type' in self.config["TTS"][self.config["selected_module"]["TTS"]]
+                else
+                self.config["TTS"][self.config["selected_module"]["TTS"]]["type"],
                 self.config["TTS"][self.config["selected_module"]["TTS"]],
                 self.config["delete_audio"]
             )
@@ -40,7 +51,8 @@ class WebSocketServer:
         host = server_config["ip"]
         port = server_config["port"]
 
-        self.logger.info("Server is running at ws://%s:%s", get_local_ip(), port)
+        self.logger.bind(tag=TAG).info("Server is running at ws://{}:{}", get_local_ip(), port)
+        self.logger.bind(tag=TAG).info("=======上面的地址是websocket协议地址，请勿用浏览器访问=======")
         async with websockets.serve(
                 self._handle_connection,
                 host,

@@ -1,5 +1,6 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
+.idea/
 *.py[cod]
 *$py.class
 
@@ -139,3 +140,9 @@ cython_debug/
 *.iml
 model.pt
 tmp
+.DS_Store
+.config.yaml
+.secrets.yaml
+.private_config.yaml
+.env.development
+docker-compose.yml
