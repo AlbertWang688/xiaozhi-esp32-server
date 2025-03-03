@@ -61,11 +61,7 @@ class Database:
             yield db
         finally:
             db.close()
-        db = self.SessionLocal()
-        try:
-            yield db
-        finally:
-            db.close()
+
 
 # Example usage:
 # config_handler = ConfigHandler(session_manager=None)  # Assuming session_manager is not needed here
