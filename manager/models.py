@@ -1,14 +1,16 @@
 # models.py
 from sqlalchemy import Column, BigInteger, String, Date, Integer, Text, DateTime
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship
+from sqlalchemy import ForeignKey
 
 Base = declarative_base()
 
 class DevUser(Base):
     __tablename__ = 'xz_devUser'
     
-    du_nativeID = Column(BigInteger, primary_key=True, comment='用户表主键')
-    d_nativeID = Column(BigInteger, comment='设备表主键')
+    du_nativeID = Column(BigInteger, primary_key=True,autoincrement=True, comment='用户表主键')
+    d_nativeID = Column(BigInteger,ForeignKey('xz_device.d_nativeID'), comment='设备表主键')
     du_userAccount = Column(String(50))
     du_userName = Column(String(50), comment='用户姓名')
     du_sex = Column(String(1), comment='性别 0:女 1:男')
@@ -21,10 +23,11 @@ class DevUser(Base):
     du_createtime = Column(DateTime)
     du_updatetime = Column(DateTime)
 
+
 class Device(Base):
     __tablename__ = 'xz_device'
     
-    d_nativeID = Column(BigInteger, primary_key=True, comment='设备表主键')
+    d_nativeID = Column(BigInteger, primary_key=True,autoincrement=True, comment='设备表主键')
     d_devMac = Column(String(50), comment='设备mac')
     d_regStatus = Column(String(1), comment='注册状态 0:未注册，1:已注册')
     d_bindDate = Column(DateTime)
@@ -35,8 +38,8 @@ class Device(Base):
 class UserChatMemory(Base):
     __tablename__ = 'xz_userChatMemory'
     
-    ucm_nativeID = Column(BigInteger, primary_key=True, comment='聊天记忆表主键')
-    du_nativeID = Column(BigInteger, comment='用户表主键')
+    ucm_nativeID = Column(BigInteger, primary_key=True,autoincrement=True, comment='聊天记忆表主键')
+    du_nativeID = Column(BigInteger,ForeignKey('xz_devUser.du_nativeID'), comment='用户表主键')
     ucm_chatDate = Column(Date, comment='聊天日期')
     ucm_chatSummary = Column(String(1000), comment='内容总结')
     ucm_createtime = Column(DateTime)
@@ -45,8 +48,8 @@ class UserChatMemory(Base):
 class UserSession(Base):
     __tablename__ = 'xz_userSession'
     
-    us_nativeid = Column(Integer, primary_key=True)
-    du_nativeID = Column(BigInteger, comment='用户表主键')
+    us_nativeid = Column(Integer, primary_key=True,autoincrement=True)
+    du_nativeID = Column(BigInteger,ForeignKey('xz_devUser.du_nativeID'), comment='用户表主键')
     us_sessionid = Column(String(50), nullable=False)
     us_bgntime = Column(DateTime)
     us_endtime = Column(DateTime)
