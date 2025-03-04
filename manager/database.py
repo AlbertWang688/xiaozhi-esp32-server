@@ -8,8 +8,8 @@ from typing import Generator
 class Database:
     def __init__(self, config_handler: ConfigHandler):
         """Initialize the database connection based on the configuration."""
-        self.config_handler = config_handler
-        self.db_config = self.config_handler.get_database_config()
+        self.config = config_handler.config
+        self.db_config = self.config.get("database")
         self.DATABASE_URL = self._get_database_url(self.db_config)
         self.engine = self._create_engine()
         self.SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=self.engine)
@@ -63,8 +63,8 @@ class Database:
             db.close()
 
 
-# Example usage:
+# # Example usage:
 # config_handler = ConfigHandler(session_manager=None)  # Assuming session_manager is not needed here
 # db = Database(config_handler)
 # db.init_db()  # Initialize the database
-# session = next(db.get_db())  # Get a database session
+# # session = next(db.get_db())  # Get a database session

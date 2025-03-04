@@ -1,0 +1,46 @@
+# services.py
+from sqlalchemy.orm import Session
+from models import DevUser, Device, UserChatMemory, UserSession
+from datetime import datetime
+import uuid
+
+class DeviceService:
+    def __init__(self, db: Session):
+        self.db = db
+
+    def create_device(self, device_data):
+        device = Device(**device_data)
+        self.db.add(device)
+        self.db.commit()
+        self.db.refresh(device)
+        return device
+
+    def get_device(self, dev_mac):
+        return self.db.query(Device).filter(Device.d_devMac == dev_mac).first()
+
+    #设备注册方法
+    def register_device(self,d_devMac):
+        """
+        Register a device by checking if the d_devMac exists in the Device table.
+        If it exists, generate an AppToken, update the record, and return the AppToken.
+        """
+        # Query the Device table to check if the d_devMac exists
+        device = self.db.query(Device).filter_by(d_devMac=d_devMac).first()
+        
+        if device:
+            # Generate a new AppToken
+            app_token = str(uuid.uuid4())
+            
+            # Update the device record with the new AppToken and set the registration status
+            device.d_appToken = app_token
+            device.d_regStatus = '1'  # Set to '1' for '已注册'
+            device.d_registerTime = datetime.now()
+            
+            # Commit the changes to the database
+            self.db.commit()
+            
+            return app_token
+        else:
+            # If the device does not exist, return None or raise an exception
+            return None
+    

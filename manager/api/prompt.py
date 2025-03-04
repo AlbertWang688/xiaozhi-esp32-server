@@ -1,3 +1,4 @@
+#此模块需后移到后端，以接口方式提供提示词给前端使用 2025/3/3
 from config.logger import setup_logging
 from aiohttp import web
 from config.settings import update_config

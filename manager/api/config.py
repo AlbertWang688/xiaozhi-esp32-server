@@ -10,6 +10,20 @@ from core.utils.auth_code_gen import AuthCodeGenerator  # 添加导入
 TAG = __name__
 logger = setup_logging()
 
+class Config:
+    def __init__(self, config_dict):
+        for key, value in config_dict.items():
+            if isinstance(value, dict):
+                setattr(self, key, Config(value))
+            else:
+                setattr(self, key, value)
+
+def load_config(file_path):
+    with open(file_path, 'r') as file:
+        config_dict = yaml.safe_load(file)
+    return config_dict
+
+
 class ConfigHandler:
     def __init__(self, session_manager):
         self.session_manager = session_manager
@@ -19,21 +33,22 @@ class ConfigHandler:
         # 如果存在.config.yaml文件，则使用该文件
         if os.path.exists(get_project_dir() + "data/.config.yaml"):
             self.config_path = get_project_dir() + "data/.config.yaml"
-        with open(self.config_path, 'r', encoding='utf-8') as f:
-            self.config = yaml.safe_load(f)
+        self.config = load_config(self.config_path)
+        # with open(self.config_path, 'r', encoding='utf-8') as f:
+        #     self.config = yaml.safe_load(f)
 
     async def get_module_options(self, request):
         """Get all available module options from config.yaml"""
         try:
-            with open(self.config_path, 'r', encoding='utf-8') as f:
-                config = yaml.safe_load(f)
+            # with open(self.config_path, 'r', encoding='utf-8') as f:
+            #     config = yaml.safe_load(f)
             
             # Extract available modules
             modules = {
-                'LLM': list(config.get('LLM', {}).keys()),
-                'TTS': list(config.get('TTS', {}).keys()),
-                'VAD': list(config.get('VAD', {}).keys()),
-                'ASR': list(config.get('ASR', {}).keys())
+                'LLM': list(self.config.get('LLM', {}).keys()),
+                'TTS': list(self.config.get('TTS', {}).keys()),
+                'VAD': list(self.config.get('VAD', {}).keys()),
+                'ASR': list(self.config.get('ASR', {}).keys())
             }
             
             return web.json_response({
@@ -50,7 +65,10 @@ class ConfigHandler:
             })
 
     async def get_private_configs(self, request):
-        """只返回用户绑定的设备配置"""
+        """
+            只返回用户绑定的设备配置
+            此方法为临时，后续更改为从数据库获取用户选择的设备配置
+        """
         try:
             username = request['username']
             logger.bind(tag=TAG).info(f"Getting devices for user: {username}")
@@ -87,7 +105,10 @@ class ConfigHandler:
             }, status=400)
 
     async def save_device_config(self, request):
-        """保存单个设备的配置"""
+        """
+            保存单个设备的配置
+            此方法为临时，后续更改为从数据库获取用户选择的设备配置
+        """
         try:
             data = await request.json()
             device_id = data.get('id')
@@ -136,7 +157,9 @@ class ConfigHandler:
             })
 
     async def delete_device_config(self, request):
-        """删除设备配置"""
+        """删除设备配置
+        此方法为临时，后续更改为从数据库获取用户选择的设备配置
+        """
         try:
             data = await request.json()
             device_id = data.get('device_id')
@@ -171,7 +194,9 @@ class ConfigHandler:
             })
 
     async def bind_device(self, request):
-        """绑定设备到用户"""
+        """绑定设备到用户
+            此方法为临时，后续更改为从数据库获取用户选择的设备配置
+        """
         try:
             data = await request.json()
             auth_code = data.get('auth_code')
