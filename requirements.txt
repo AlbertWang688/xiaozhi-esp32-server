@@ -21,3 +21,6 @@ sqlalchemy
 pymysql
 fastapi
 uvicorn
+pydantic
+sqlmodel
+python-jose
