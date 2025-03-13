@@ -13,6 +13,9 @@ class Settings(BaseSettings):
     
     # SQLite 特定配置
     SQLITE_DB_FILE: str = "xiaozhi.db"
+
+    #是否开启数据库异步模式
+    ASYNC_MODE: bool = False
     
     # 其他通用配置
     API_PREFIX: str = "/api"
@@ -20,13 +23,6 @@ class Settings(BaseSettings):
     
     # 60 minutes * 24 hours * 8 days = 8 days
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8
-    @property
-    def DATABASE_URL(self) -> str:
-        if self.DB_TYPE == "sqlite":
-            return f"sqlite:///./{self.SQLITE_DB_FILE}"
-        elif self.DB_TYPE == "mysql":
-            return f"mysql+pymysql://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
-        raise ValueError(f"Unsupported database type: {self.DB_TYPE}")
     
     class Config:
         env_file = ".env"

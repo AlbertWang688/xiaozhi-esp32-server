@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>FastAPI Bearer Token Example</title>
+<script>
+async function getToken() {
+    const response = await fetch('/token/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            username: document.getElementById('username').value,
+            password: document.getElementById('password').value
+        })
+    });
+    const data = await response.json();
+    if (response.ok) {
+        document.getElementById('token').innerText = `Token: ${data.access_token}`;
+        localStorage.setItem('token', data.access_token);
+    } else {
+        alert(data.detail);
+    }
+}
+
+async function accessProtectedResource() {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        alert('No token available. Please log in first.');
+        return;
+    }
+    const response = await fetch('/protected-resource/', {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    });
+    const data = await response.json();
+    if (response.ok) {
+        document.getElementById('resource-content').innerText = JSON.stringify(data, null, 2);
+    } else {
+        alert(data.detail);
+    }
+}
+</script>
+</head>
+<body>
+<h1>Login</h1>
+<label for="username">Username:</label>
+<input type="text" id="username">
+<br>
+<label for="password">Password:</label>
+<input type="password" id="password">
+<br>
+<button onclick="getToken()">Get Token</button>
+<p id="token"></p>
+
+<h1>Access Protected Resource</h1>
+<button onclick="accessProtectedResource()">Access Resource</button>
+<pre id="resource-content"></pre>
+</body>
+</html>

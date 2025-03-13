@@ -27,11 +27,3 @@ def update_config(config):
     """将配置保存到YAML文件"""
     with open(get_config_file(), 'w') as f:
         yaml.dump(config, f)
-
-def get_database_url(config) -> str:
-    dbsettings = config.get("database")
-    if dbsettings["DB_TYPE"] == "sqlite":
-        return f"sqlite:///./{dbsettings["SQLITE_DB_FILE"]}"
-    elif dbsettings["DB_TYPE"] == "mysql":
-        return f"mysql+pymysql://{dbsettings["DB_USER"]}:{dbsettings["DB_PASSWORD"]}@{dbsettings["DB_HOST"]}:{dbsettings["DB_PORT"]}/{dbsettings["DB_NAME"]}"
-    raise ValueError(f"Unsupported database type: {dbsettings["DB_TYPE"]}")

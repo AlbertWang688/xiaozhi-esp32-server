@@ -9,7 +9,6 @@ from backend.app.auth import verify_token,generate_token_for_device,get_current_
 
 router = APIRouter()
 
-
 # Device endpoints
 @router.post("/", response_model=Device,description="新增设备")
 async def create_device(device: Device, session: Session = Depends(get_session)):
@@ -23,7 +22,6 @@ async def get_device(
     session: Session = Depends(get_session),
     current_device: TokenData = Depends(get_current_device)
     ):
-    print(current_device.dev_mac)
     dao = DeviceDAO(session)
     device = await dao.get_by_id(device_id)
     if not device:
@@ -44,7 +42,11 @@ async def update_device(
     return updated_device
 
 @router.delete("/{device_id}",description="删除设备")
-async def delete_device(device_id: int, session: Session = Depends(get_session),current_device: TokenData = Depends(get_current_device)):
+async def delete_device(
+    device_id: int, 
+    session: Session = Depends(get_session),
+    current_device: TokenData = Depends(get_current_device)
+    ):
     dao = DeviceDAO(session)
     if not await dao.delete(device_id):
         raise HTTPException(status_code=404, detail="Device not found")

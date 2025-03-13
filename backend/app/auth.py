@@ -9,6 +9,7 @@ from fastapi.security import OAuth2PasswordBearer,HTTPBearer,HTTPAuthorizationCr
 from backend.app.dao.device import DeviceDAO
 from backend.app.db import get_session
 from backend.app.models.xiaozhi import Device
+from sqlalchemy.ext.asyncio import AsyncSession
 
 TAG = __name__
 logger = setup_logging()
@@ -28,7 +29,7 @@ class TokenData(BaseModel):
 # oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 # oauth2_scheme = HTTPBearer()
 security = HTTPBearer()
-async def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
+def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()
     if expires_delta:
         # expire = datetime.utcnow() + expires_delta
@@ -40,7 +41,7 @@ async def create_access_token(data: dict, expires_delta: Optional[timedelta] = N
     return encoded_jwt
 
 # def verify_token(token: str) -> TokenData:
-async def verify_token(token: HTTPAuthorizationCredentials = Depends(security)):
+def verify_token(token: HTTPAuthorizationCredentials = Depends(security)):
     """
     Verify the access token
     :param token: JWT access token
@@ -73,24 +74,23 @@ async def verify_token(token: HTTPAuthorizationCredentials = Depends(security)):
         )
     return token_data
 
-async def generate_token_for_device(dev_mac: str,activation_code:str,session=Depends(get_session)) -> str:
+async def generate_token_for_device(dev_mac: str,activation_code:str,session:AsyncSession ) -> str:
     """
     Generate a new access token for the device
     :param dev_mac: Device MAC address
     :return: JWT access token
     """
-    # session = get_session()
     device_dao = DeviceDAO(session)
     device = await device_dao.get_by_mac(dev_mac)
-    logger.bind(tag=TAG).info(f"device:{device}")
-    print(f"device:{device}")
+    # logger.bind(tag=TAG).info(f"device:{device}")
+    # print(f"device:{device}")
     if not device:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=f"Invalid device :{dev_mac}",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    #暂时先不验证激活码
+    #暂时在不输入激活码的情况下先不验证激活码
     if activation_code and device.d_activationCode != activation_code:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -102,17 +102,11 @@ async def generate_token_for_device(dev_mac: str,activation_code:str,session=Dep
     dev_dict = {
         "device_id": device.d_nativeID,
         "dev_mac": device.d_devMac,
-        # "dev_activationCode": device.d_activationCode,
-        "dev_robotNickName": device.d_robotNickName,
-        "dev_voiceName": device.d_voiceName,
-        "dev_roleIntro": device.d_roleIntro,
-        "dev_regStatus": device.d_regStatus,
-        "dev_protocalVersion": device.d_protocalVersion
         }
     access_token = create_access_token(data=dev_dict, expires_delta=access_token_expires)
     return {"access_token": access_token, "token_type": "bearer"}
 
-async def get_current_device(token: str = Depends(security)) -> TokenData:
+def get_current_device(token: str = Depends(security)) -> TokenData:
     """
     FastAPI 依赖，统一用于获取并验证当前 token，有效则返回 token 解析后的数据
     """
