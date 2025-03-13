@@ -20,8 +20,10 @@ async def create_device(device: Device, session: Session = Depends(get_session))
 @router.get("/{device_id}", response_model=Device,description="查询设备")
 async def get_device(
     device_id: int, 
-    session: Session = Depends(get_session)
+    session: Session = Depends(get_session),
+    current_device: TokenData = Depends(get_current_device)
     ):
+    print(current_device.dev_mac)
     dao = DeviceDAO(session)
     device = await dao.get_by_id(device_id)
     if not device:
